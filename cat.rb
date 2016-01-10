@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
 
-$stdout.sync = true
-$stdout.flush
-
 files = ARGV
 
 # Handle no arguments by reading stdin
@@ -22,6 +19,8 @@ files.each do |path|
     $stderr.puts "cat: #{path}: No such file or directory"
     exit_code = 1
   end
+
+  $stdout.flush
 end
 
 exit(exit_code)
