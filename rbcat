@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "socket"
+
 files = ARGV
 
 # Handle no arguments by reading stdin
@@ -18,13 +20,19 @@ files.each do |path|
     next
   end
 
-  if File.exist?(path)
-    $stdout.print(File.read(path))
-  else
+  unless File.exist?(path)
     $stderr.puts "cat: #{path}: No such file or directory"
     exit_code = 1
+    next
   end
 
+  if File.socket?(path)
+    UNIXSocket.open(path) do |sock|
+      IO.copy_stream(sock, $stdout)
+    end
+  else
+    $stdout.print(File.read(path))
+  end
 end
 
 exit(exit_code)
