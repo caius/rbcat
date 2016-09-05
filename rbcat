@@ -16,7 +16,7 @@ end
 
 files.each do |path|
   if path == "-"
-    $stdout.print($stdin.read)
+    IO.copy_stream($stdin, $stdout)
     next
   end
 
