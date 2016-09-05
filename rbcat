@@ -2,6 +2,12 @@
 
 require "socket"
 
+class StdinIO
+  def self.open(_path, &block)
+    block.call $stdin
+  end
+end
+
 files = ARGV
 
 # Handle no arguments by reading stdin
@@ -15,25 +21,23 @@ exit_code = 0
 end
 
 files.each do |path|
-  if path == "-"
-    IO.copy_stream($stdin, $stdout)
-    next
-  end
-
-  unless File.exist?(path)
+  if path != "-" && !File.exist?(path)
     $stderr.puts "cat: #{path}: No such file or directory"
     exit_code = 1
     next
   end
 
-  if File.socket?(path)
-    UNIXSocket.open(path) do |sock|
-      IO.copy_stream(sock, $stdout)
-    end
+  stream_class = case
+  when path == "-"
+    StdinIO
+  when File.socket?(path)
+    UNIXSocket
   else
-    File.open(path, "r") do |f|
-      IO.copy_stream(f, $stdout)
-    end
+    File
+  end
+
+  stream_class.open(path) do |sock|
+    IO.copy_stream(sock, $stdout)
   end
 end
 
