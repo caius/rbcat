@@ -7,6 +7,11 @@ files[0] ||= "-"
 
 exit_code = 0
 
+[$stdout, $stderr].each do |io|
+  io.sync = true
+  io.flush
+end
+
 files.each do |path|
   if path == "-"
     $stdout.print($stdin.read)
@@ -20,7 +25,6 @@ files.each do |path|
     exit_code = 1
   end
 
-  $stdout.flush
 end
 
 exit(exit_code)
