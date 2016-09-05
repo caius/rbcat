@@ -31,7 +31,9 @@ files.each do |path|
       IO.copy_stream(sock, $stdout)
     end
   else
-    $stdout.print(File.read(path))
+    File.open(path, "r") do |f|
+      IO.copy_stream(f, $stdout)
+    end
   end
 end
 
