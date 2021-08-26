@@ -7,23 +7,20 @@ class Cat
   attr_reader :argv
 
   def initialize(argv)
-    @argv = argv.dup
-  end
+    self.argv = argv.dup
+    @exit_code = 0
 
-  def call
-    files = argv
+    @io = $stdout
+    @error_io = $stderr
 
-    # Handle no arguments by reading stdin
-    files[0] ||= "-"
-
-    exit_code = 0
-
-    [$stdout, $stderr].each do |io|
+    [@io, @error_io].each do |io|
       io.sync = true
       io.flush
     end
+  end
 
-    files.each do |path|
+  def call
+    argv.each do |path|
       if path != "-" && !File.exist?(path)
         $stderr.puts "cat: #{path}: No such file or directory"
         exit_code = 1
@@ -46,6 +43,22 @@ class Cat
 
     exit_code
   end
+
+  private
+
+  attr_reader :io, :error_io
+
+  def argv=(value)
+    @argv = if value.empty?
+      # Handle no arguments by reading stdin
+      ["-"]
+    else
+      value
+    end
+  end
+
+  def fail(path)
+    @exit_code = 1
+    @error_io
+  end
 end
-
-
